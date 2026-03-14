@@ -1,0 +1,240 @@
+/* ==========================================
+   1. VARIÁVEIS DE TEMA (O NÚCLEO)
+   ========================================== */
+:root {
+    /* MODO ESCURO (PADRÃO) */
+    --bg-principal: #050505;
+    --bg-cards: #0f0f0f;
+    --dark-surface: #1a1a1a;
+    --texto-principal: #ffffff;
+    --texto-secundario: #cccccc;
+    --borda: #222222;
+    --neon-pink: #ff003c;
+    --neon-blue: #00f2ff;
+}
+
+[data-theme="light"] {
+    /* MODO CLARO */
+    --bg-principal: #ffffff; 
+    --bg-cards: #f8f9fa;    
+    --dark-surface: #e9ecef;
+    --texto-principal: #000000;
+    --texto-secundario: #333333;
+    --borda: #dee2e6;
+}
+
+/* ==========================================
+   2. ESTILOS GLOBAIS E TIPOGRAFIA
+   ========================================== */
+body { 
+    background-color: var(--bg-principal) !important; 
+    color: var(--texto-principal) !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, h5, h6 { 
+    color: var(--texto-principal); 
+}
+
+p { 
+    color: var(--texto-secundario); 
+}
+
+/* Scrollbar Gamer (Barra de Rolagem) */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-principal); }
+::-webkit-scrollbar-thumb { background: var(--borda); border-radius: 4px; transition: 0.3s; }
+::-webkit-scrollbar-thumb:hover { background: var(--neon-pink); }
+
+/* ==========================================
+   3. COMPONENTES PRINCIPAIS (Navbar, Cards, Forms)
+   ========================================== */
+/* Navbar */
+.navbar {
+    background-color: var(--bg-principal) !important;
+    border-bottom: 2px solid var(--neon-pink) !important;
+    transition: background-color 0.3s ease;
+}
+
+/* Cards Universais */
+.card, .admin-box, .profile-card {
+    background-color: var(--bg-cards) !important;
+    border: 1px solid var(--borda) !important;
+    color: var(--texto-principal) !important;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-card-hover:hover {
+    transform: translateY(-8px);
+    border-color: var(--neon-blue) !important;
+    box-shadow: 0 10px 25px rgba(0, 242, 255, 0.15);
+}
+
+.bg-dark { 
+    background-color: var(--bg-cards) !important; 
+}
+
+/* Formulários e Inputs */
+label, .form-label {
+    color: var(--texto-principal) !important;
+    font-weight: 600;
+}
+
+.form-control, .form-select {
+    background-color: var(--bg-principal) !important;
+    color: var(--texto-principal) !important;
+    border: 1px solid var(--borda) !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--neon-blue) !important;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2) !important;
+}
+
+/* Modal Auth (Glassmorphism) */
+.auth-glass {
+    background: var(--bg-cards) !important;
+    backdrop-filter: blur(25px);
+    border: 2px solid var(--neon-pink) !important;
+    border-radius: 16px;
+}
+
+/* Botão de Troca de Tema */
+.theme-switch {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+.theme-switch:hover { 
+    transform: rotate(15deg) scale(1.1); 
+}
+
+/* ==========================================
+   4. EFEITOS ESPECIAIS E WIDGETS
+   ========================================== */
+/* Logo Glitch Effect */
+.logo-glitch {
+    font-family: 'Syncopate', sans-serif;
+    font-size: 2.5rem;
+    position: relative;
+    color: var(--texto-principal);
+    letter-spacing: 2px;
+}
+.logo-glitch::before, .logo-glitch::after {
+    content: attr(data-text);
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0.8;
+}
+.logo-glitch::before { color: var(--neon-blue); z-index: -1; animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite; }
+.logo-glitch::after { color: var(--neon-pink); z-index: -2; animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) reverse both infinite; }
+
+/* Ticker Animado */
+.ticker-wrap { 
+    background: var(--neon-pink); 
+    color: white; 
+    padding: 10px 0; 
+    overflow: hidden; 
+    box-shadow: 0 0 15px rgba(255, 0, 60, 0.4); 
+}
+.ticker { display: inline-block; white-space: nowrap; animation: ticker 35s linear infinite; }
+.ticker-item { margin-right: 60px; font-weight: 700; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; }
+
+/* Tags Animadas (Admin/Vip) */
+.badge-supremo {
+    background: linear-gradient(90deg, #ff003c, #8a0020, #ff003c);
+    background-size: 200% auto;
+    animation: bgFlow 3s infinite linear;
+    border: none;
+}
+
+/* Carrossel (Blindado contra o Light Mode) */
+.carousel-item img { 
+    height: 550px; 
+    object-fit: cover; 
+}
+.carousel-caption { 
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 100%) !important;
+    border: none !important;
+    bottom: 0; left: 0; right: 0;
+    padding: 40px 30px 20px 30px !important;
+}
+.carousel-caption h2 {
+    color: #ffffff !important; /* Sempre branco, independente do tema */
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.9) !important;
+}
+
+/* Rodapé do Ranking de Elite */
+#ranking-elite + hr + .text-center small {
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+[data-theme="dark"] #ranking-elite + hr + .text-center small {
+    color: var(--neon-blue) !important;
+    text-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
+    opacity: 0.9;
+}
+[data-theme="light"] #ranking-elite + hr + .text-center small {
+    color: #444444 !important;
+    opacity: 1;
+}
+
+/* ==========================================
+   5. SISTEMA DE TOASTS E BOTÕES SOCIAIS
+   ========================================== */
+#glitch-toast-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.glitch-toast {
+    min-width: 250px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: var(--texto-principal);
+    font-weight: bold;
+    font-family: 'Space Grotesk', sans-serif;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-cards);
+}
+.glitch-toast.show { transform: translateX(0); opacity: 1; }
+
+.toast-success { border-left: 5px solid #00ff44; border-top: 1px solid var(--borda); border-right: 1px solid var(--borda); border-bottom: 1px solid var(--borda); }
+.toast-error { border-left: 5px solid var(--neon-pink); border-top: 1px solid var(--borda); border-right: 1px solid var(--borda); border-bottom: 1px solid var(--borda); }
+.toast-info { border-left: 5px solid var(--neon-blue); border-top: 1px solid var(--borda); border-right: 1px solid var(--borda); border-bottom: 1px solid var(--borda); }
+
+/* Botões de Compartilhamento */
+.share-btn {
+    width: 45px; height: 45px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; border: none; transition: 0.3s;
+}
+.share-btn:hover { transform: translateY(-5px) scale(1.1); }
+.share-wpp { background: #25D366; color: #fff !important; }
+.share-x { background: #000; border: 1px solid #333; color: #fff !important; }
+.share-copy { background: var(--neon-blue); color: #000 !important; }
+
+/* ==========================================
+   6. KEYFRAMES (ANIMAÇÕES)
+   ========================================== */
+@keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+}
+@keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+@keyframes bgFlow { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }

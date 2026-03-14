@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comando Central | GLITCHcore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background-color: var(--bg-principal); color: var(--texto-principal); transition: 0.3s; }
+        .admin-box { background: var(--bg-cards); padding: 40px; border-radius: 16px; border-top: 5px solid var(--neon-pink); border: 1px solid var(--borda); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .admin-box-blue { border-top-color: var(--neon-blue); }
+        .list-admin-item { transition: 0.3s; border-left: 4px solid transparent; background-color: var(--bg-cards) !important; color: var(--texto-principal) !important; }
+        .list-admin-item:hover { background-color: var(--bg-principal) !important; border-left-color: var(--neon-pink); }
+        
+        .ql-toolbar { background: var(--bg-cards); border: 1px solid var(--borda) !important; }
+        .ql-container { border: 1px solid var(--borda) !important; background: var(--bg-principal); }
+        .ql-editor { min-height: 300px; color: var(--texto-principal); }
+        .ql-stroke { stroke: var(--texto-secundario) !important; }
+        .ql-fill { fill: var(--texto-secundario) !important; }
+        .ql-picker-label { color: var(--texto-secundario) !important; }
+    </style>
+</head>
+<body class="py-5">
+
+    <script>
+        (function() {
+            const temaSalvo = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', temaSalvo);
+        })();
+    </script>
+
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10 admin-box">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold mb-0 text-uppercase" id="tituloAdminPanel"><i class="fa-solid fa-satellite-dish text-danger me-2"></i> Deploy de Transmissão</h2>
+                    <a href="index.html" class="btn btn-outline-info btn-sm"><i class="fa-solid fa-house"></i> Portal</a>
+                </div>
+                <hr class="border-secondary mb-4">
+                
+                <form id="formNoticia">
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">Manchete Principal</label>
+                            <input type="text" id="titulo" class="form-control" placeholder="Ex: Novo Update Quebra o Meta..." required>
+                        </div>
+                        <div class="col-md-4 mt-3 mt-md-0">
+                            <label class="form-label fw-bold">Plataforma Base</label>
+                            <select id="plataforma" class="form-select" required>
+                                <option value="pc">🖥️ PC Gamer</option>
+                                <option value="playstation">🎮 PlayStation</option>
+                                <option value="xbox">🟢 Xbox</option>
+                                <option value="nintendo">🍄 Nintendo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-7">
+                            <label class="form-label fw-bold">Resumo / Subtítulo</label>
+                            <input type="text" id="resumo" class="form-control" placeholder="Uma frase curta de impacto..." required>
+                        </div>
+                        <div class="col-md-5 mt-3 mt-md-0">
+                            <label class="form-label fw-bold"><i class="fa-regular fa-image me-1"></i> URL da Imagem Capa</label>
+                            <input type="url" id="imagem" class="form-control" placeholder="https://..." required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="fa-solid fa-pen-nib me-1"></i> Corpo da Matéria</label>
+                        <div id="editor-container"></div>
+                    </div>
+
+                    <div class="d-flex gap-3">
+                        <button type="submit" id="btnSubmitAdmin" class="btn btn-danger btn-lg w-100 fw-bold py-3 shadow-lg">
+                            <i class="fa-solid fa-rocket me-2"></i> EXECUTAR DEPLOY
+                        </button>
+                        <button type="button" id="btnCancelarEdicao" class="btn btn-outline-secondary btn-lg fw-bold px-5 py-3 d-none" onclick="cancelarEdicao()">
+                            CANCELAR
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10 admin-box admin-box-blue">
+                <h2 class="fw-bold mb-4"><i class="fa-solid fa-server text-info me-2"></i> GERENCIAR ARQUIVO</h2>
+                <div id="listaAdminNoticias" class="list-group">
+                    <div class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-info mb-2"></div><br>Sincronizando...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+
+    <script>
+        // SISTEMA DE TOASTS
+        function showToast(mensagem, tipo = 'info') {
+            let container = document.getElementById('glitch-toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'glitch-toast-container';
+                document.body.appendChild(container);
+            }
+            const toast = document.createElement('div');
+            toast.className = `glitch-toast toast-${tipo}`;
+            let icone = '<i class="fa-solid fa-circle-info text-info"></i>';
+            if (tipo === 'success') icone = '<i class="fa-solid fa-check text-success"></i>';
+            if (tipo === 'error') icone = '<i class="fa-solid fa-triangle-exclamation text-danger"></i>';
+            toast.innerHTML = `${icone} <span>${mensagem}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3500);
+        }
+
+// ATIVAÇÃO DO EDITOR COM ARSENAL COMPLETO (IMAGEM, VÍDEO, CORES)
+        var quill = new Quill('#editor-container', { 
+            theme: 'snow', 
+            placeholder: 'Redija o dossiê aqui...',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'align': [] }],
+                    ['link', 'image', 'video'], // <-- Olha os botões de imagem e vídeo de volta!
+                    ['clean'] // Botão de limpar formatação
+                ]
+            }
+        });
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-HlFxDsp4AsbezKd28YpiQZi3UHUipbc",
+            authDomain: "nexus-6d8df.firebaseapp.com",
+            projectId: "nexus-6d8df",
+            storageBucket: "nexus-6d8df.firebasestorage.app",
+            messagingSenderId: "1045779517061",
+            appId: "1:1045779517061:web:f2d6877724cee68374a3ec"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const emailDoChefe = "kromossomo.m@gmail.com";
+
+        let noticiasGlobais = [];
+        let modoEdicaoId = null;
+
+        auth.onAuthStateChanged(usuario => {
+            if (!usuario || usuario.email !== emailDoChefe) {
+                window.location.href = 'index.html';
+            } else {
+                carregarNoticiasAdmin();
+            }
+        });
+
+        async function carregarNoticiasAdmin() {
+            const lista = document.getElementById('listaAdminNoticias');
+            try {
+                const res = await fetch('/api/news');
+                noticiasGlobais = await res.json();
+                
+                lista.innerHTML = noticiasGlobais.length === 0 ? '<div class="text-center py-3">Arquivo vazio.</div>' : '';
+                
+                noticiasGlobais.forEach(n => {
+                    lista.innerHTML += `
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3 mb-2 rounded list-admin-item">
+                            <div class="d-flex align-items-center overflow-hidden w-75">
+                                <img src="${n.imagem}" class="rounded me-3 shadow" style="width: 80px; height: 60px; object-fit: cover;">
+                                <div class="text-truncate w-100">
+                                    <h6 class="mb-0 fw-bold">${n.titulo}</h6>
+                                    <small class="text-muted">${n.data}</small>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="carregarParaEdicao('${n.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="deletarNoticia('${n.id}')" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>`;
+                });
+            } catch (erro) { console.error(erro); }
+        }
+
+        window.carregarParaEdicao = function(id) {
+            // CORREÇÃO MESTRA: Convertendo os dois para String (Texto) para não dar erro de tipo!
+            const noticia = noticiasGlobais.find(n => String(n.id) === String(id));
+            
+            if (!noticia) {
+                showToast("Erro: Matéria não encontrada.", "error");
+                return;
+            }
+
+            modoEdicaoId = id;
+            document.getElementById('titulo').value = noticia.titulo;
+            document.getElementById('plataforma').value = noticia.plataforma;
+            document.getElementById('resumo').value = noticia.resumo || '';
+            document.getElementById('imagem').value = noticia.imagem;
+            
+            // Injetando os dados usando a API correta do Quill
+            quill.clipboard.dangerouslyPasteHTML(noticia.conteudo);
+
+            const btnSubmit = document.getElementById('btnSubmitAdmin');
+            btnSubmit.innerHTML = '<i class="fa-solid fa-arrows-rotate me-2"></i> ATUALIZAR MATÉRIA';
+            btnSubmit.classList.replace('btn-danger', 'btn-warning');
+            btnSubmit.classList.replace('text-white', 'text-dark');
+            
+            document.getElementById('btnCancelarEdicao').classList.remove('d-none');
+            document.getElementById('tituloAdminPanel').innerHTML = '<i class="fa-solid fa-pen-ruler text-warning me-2"></i> Modo de Edição';
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast("Matéria carregada para edição.", "info");
+        }
+
+        window.cancelarEdicao = function() {
+            modoEdicaoId = null;
+            document.getElementById('formNoticia').reset();
+            
+            // CORREÇÃO MESTRA: Limpando a API do Quill corretamente
+            quill.setContents([]); 
+            
+            const btnSubmit = document.getElementById('btnSubmitAdmin');
+            btnSubmit.innerHTML = '<i class="fa-solid fa-rocket me-2"></i> EXECUTAR DEPLOY';
+            btnSubmit.classList.replace('btn-warning', 'btn-danger');
+            btnSubmit.classList.add('text-white');
+            
+            document.getElementById('btnCancelarEdicao').classList.add('d-none');
+            document.getElementById('tituloAdminPanel').innerHTML = '<i class="fa-solid fa-satellite-dish text-danger me-2"></i> Deploy de Transmissão';
+            
+            showToast("Edição cancelada.", "info");
+        }
+
+        window.deletarNoticia = async function(id) {
+            if (confirm("Deseja DELETAR esta matéria permanentemente?")) {
+                const res = await fetch(`/api/news/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    showToast("Matéria aniquilada com sucesso.", "success");
+                    carregarNoticiasAdmin();
+                } else {
+                    showToast("Falha ao aniquilar a matéria.", "error");
+                }
+            }
+        };
+
+        document.getElementById('formNoticia').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnSubmit = document.getElementById('btnSubmitAdmin');
+            
+            // TRAVA DE SEGURANÇA: Impede postagem se o texto estiver vazio
+            if (quill.getText().trim().length === 0) {
+                showToast("O corpo da matéria não pode estar vazio, soldado!", "error");
+                return;
+            }
+
+            const dados = {
+                titulo: document.getElementById('titulo').value,
+                plataforma: document.getElementById('plataforma').value,
+                resumo: document.getElementById('resumo').value,
+                autor: "Comando GLITCHcore", 
+                tags: "Atualização",         
+                imagem: document.getElementById('imagem').value,
+                conteudo: quill.root.innerHTML 
+            };
+            
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin me-2"></i> PROCESSANDO...';
+
+            try {
+                const url = modoEdicaoId ? `/api/news/${modoEdicaoId}` : '/api/news';
+                const metodo = modoEdicaoId ? 'PATCH' : 'POST';
+
+                const resposta = await fetch(url, {
+                    method: metodo,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+
+                if (resposta.ok) {
+                    showToast(modoEdicaoId ? "Matéria atualizada com sucesso!" : "Deploy executado com sucesso!", "success");
+                    cancelarEdicao(); // Limpa e reseta
+                    carregarNoticiasAdmin(); // Atualiza a lista lá embaixo
+                } else {
+                    showToast("Erro ao comunicar com o servidor.", "error");
+                }
+            } catch (erro) {
+                showToast("Falha crítica de conexão.", "error");
+            } finally {
+                btnSubmit.disabled = false;
+                if (!modoEdicaoId) {
+                    btnSubmit.innerHTML = '<i class="fa-solid fa-rocket me-2"></i> EXECUTAR DEPLOY';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

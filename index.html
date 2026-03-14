@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLITCHcore | Ultimate Gaming Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Ajuste fino para o Footer e Widgets */
+        .qg-footer { background-color: var(--bg-cards); border-top: 2px solid var(--neon-pink); }
+        .hover-neon { transition: 0.3s; }
+        .hover-neon:hover { color: var(--neon-blue) !important; text-shadow: 0 0 8px rgba(0, 242, 255, 0.5); padding-left: 5px; }
+        
+        /* BLINDAGEM DO CARROSSEL: Impede que o Modo Claro deixe ele com fundo sólido branco */
+        .carousel-caption {
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 100%) !important;
+            border: none !important;
+            bottom: 0; left: 0; right: 0;
+            padding-bottom: 2rem !important;
+        }
+        .carousel-caption h2 {
+            color: #ffffff !important;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.9) !important;
+        }
+    </style>
+</head>
+<body> 
+    <script>
+        (function() {
+            const temaSalvo = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', temaSalvo);
+        })();
+    </script>
+
+    <div class="ticker-wrap">
+        <div class="ticker" id="ticker-dinamico">
+            <span class="ticker-item">SINCRONIZANDO COM O QG...</span>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg py-3 sticky-top" style="background-color: var(--bg-principal); border-bottom: 1px solid var(--borda);">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="logo-glitch mb-0" data-text="GLITCHcore">GLITCHcore</h1>
+            
+            <div class="d-flex align-items-center gap-3">
+                <div id="theme-toggle" class="theme-switch me-2" style="cursor: pointer;">
+                    <i class="fa-solid fa-moon text-warning fs-4"></i>
+                </div>
+
+                <a href="admin.html" id="btnAdminPainel" class="btn btn-outline-warning btn-sm fw-bold d-none shadow-sm">
+                    <i class="fa-solid fa-gear"></i> PAINEL ADMIN
+                </a>
+                
+                <button id="btnAuthTrigger" class="btn btn-danger fw-bold px-4 shadow" data-bs-toggle="modal" data-bs-target="#authModal">
+                    <i class="fa-solid fa-user me-2"></i> LOGIN
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="py-3 shadow-sm" style="background-color: var(--bg-cards); border-bottom: 1px solid var(--borda);">
+        <div class="container d-flex gap-2 flex-wrap justify-content-center">
+            <button class="btn btn-outline-light btn-sm filter-btn active fw-bold px-4" data-plataforma="todas">TODAS</button>
+            <button class="btn btn-outline-info btn-sm filter-btn fw-bold px-4" data-plataforma="pc">PC</button>
+            <button class="btn btn-outline-primary btn-sm filter-btn fw-bold px-4" data-plataforma="playstation">PLAYSTATION</button>
+            <button class="btn btn-outline-success btn-sm filter-btn fw-bold px-4" data-plataforma="xbox">XBOX</button>
+            <button class="btn btn-outline-danger btn-sm filter-btn fw-bold px-4" data-plataforma="nintendo">NINTENDO</button>
+        </div>
+    </div>
+
+    <div id="destaques-container" class="container mt-5 d-none">
+        <h3 class="fw-bold mb-4 font-syncopate letter-spacing-1 border-bottom border-secondary pb-2">
+            <i class="fa-solid fa-fire text-danger me-2"></i> HOT DEPLOYS
+        </h3>
+        
+        <div id="carouselNews" class="carousel slide carousel-fade rounded-4 overflow-hidden shadow-lg border border-secondary" data-bs-ride="carousel">
+            <div class="carousel-indicators" id="carousel-indicators"></div>
+            <div class="carousel-inner" id="carousel-inner"></div>
+            
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselNews" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselNews" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Próximo</span>
+            </button>
+        </div>
+    </div>
+
+    <main class="container mt-5 mb-5 pt-3">
+        <div class="row">
+            <div class="col-lg-8">
+                <h4 class="fw-bold mb-4 font-syncopate letter-spacing-1 border-bottom border-secondary pb-2">
+                    <i class="fa-solid fa-bolt-lightning text-warning me-2"></i> ÚLTIMOS DEPLOYS
+                </h4>
+                <div id="news-list-vertical" class="mb-5"></div>
+
+                <h4 class="fw-bold mb-4 font-syncopate letter-spacing-1 border-bottom border-secondary pb-2 mt-5">
+                    <i class="fa-solid fa-box-archive text-muted me-2"></i> REGISTROS ANTERIORES
+                </h4>
+                <div class="row g-4" id="news-grid-archive"></div>
+
+                <div class="text-center mt-5 mb-4">
+                    <button id="btnLoadMore" class="btn btn-outline-danger btn-lg fw-bold letter-spacing-1 px-5 rounded-pill d-none shadow-sm">
+                        <i class="fa-solid fa-chevron-down me-2"></i> CARREGAR MAIS ARQUIVOS
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-lg-4 mt-5 mt-lg-0">
+                
+                <h4 class="fw-bold mb-4 font-syncopate letter-spacing-1 border-bottom border-secondary pb-2">
+                    <i class="fa-solid fa-trophy text-warning me-2"></i> ELITE GLITCHCORE
+                </h4>
+                <div class="card p-4 shadow-lg mb-4" style="background-color: var(--bg-cards); border: 1px solid var(--borda);">
+                    <div id="ranking-elite" class="d-flex flex-column gap-3">
+                        <p class="text-muted small text-center">Sincronizando dados de usuários...</p>
+                    </div>
+                    <hr class="border-secondary my-4">
+                    <div class="text-center">
+                        <small class="text-muted italic">Acesse diariamente para subir no ranking!</small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="qg-footer py-5 mt-5">
+        <div class="container text-center text-md-start">
+            <div class="row gap-4 gap-md-0">
+                <div class="col-md-4 mb-3">
+                    <h3 class="logo-glitch mb-3 fs-4" data-text="GLITCHcore">GLITCHcore</h3>
+                    <p class="text-muted small pe-md-4">A sua inteligência central para notícias de FPS, atualizações de sistema e guias táticos. Sincronize com a base e nunca fique desinformado.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="fw-bold font-syncopate mb-4 text-secondary letter-spacing-1">CANAIS DE TRANSMISSÃO</h6>
+                    <div class="d-flex flex-column gap-3">
+                        <a href="#" class="text-muted text-decoration-none hover-neon fw-bold small"><i class="fa-brands fa-x-twitter text-light me-2 fs-5"></i> Transmissões Curtas</a>
+                        <a href="#" class="text-muted text-decoration-none hover-neon fw-bold small"><i class="fa-brands fa-youtube text-danger me-2 fs-5"></i> Registros em Vídeo</a>
+                        <a href="#" class="text-muted text-decoration-none hover-neon fw-bold small"><i class="fa-brands fa-twitch text-info me-2 fs-5"></i> Operações Ao Vivo</a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3 text-md-end">
+                    <h6 class="fw-bold font-syncopate mb-4 text-secondary letter-spacing-1">STATUS DO SISTEMA</h6>
+                    <p class="text-muted small mb-1 font-monospace">GLITCHcore OS v2.4.0</p>
+                    <p class="text-muted small font-monospace">Servidor: <span class="text-success"><i class="fa-solid fa-circle-dot fa-fade me-1"></i> Operante</span></p>
+                    <p class="text-muted small mt-4">© 2026 Comando Central.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content auth-glass border-0">
+                <div class="modal-body p-5 position-relative">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+                    
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold mb-0">ACESSO <span class="text-danger">GLITCHcore</span></h3>
+                        <p class="text-muted small">Junte-se à maior comunidade gamer</p>
+                    </div>
+
+                    <ul class="nav nav-pills nav-justified mb-4 auth-tabs" role="tablist">
+                        <li class="nav-item"><button class="nav-link active fw-bold" data-bs-toggle="pill" data-bs-target="#tabLogin">ENTRAR</button></li>
+                        <li class="nav-item"><button class="nav-link fw-bold" data-bs-toggle="pill" data-bs-target="#tabCadastro">CADASTRAR</button></li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tabLogin">
+                            <button id="btnGoogle" class="btn btn-outline-light w-100 mb-3 py-2 d-flex justify-content-center align-items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="22px" height="22px">
+                                    <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+                                    <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+                                    <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+                                    <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+                                </svg>
+                                Entrar com Google
+                            </button>
+                            <form>
+                                <input type="email" class="form-control border-secondary mb-3 py-2" placeholder="Seu E-mail" required>
+                                <input type="password" class="form-control border-secondary mb-4 py-2" placeholder="Senha" required>
+                                <button type="submit" class="btn btn-danger w-100 py-2 fw-bold fs-5">ACESSAR BASE</button>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="tabCadastro">
+                            <form>
+                                <input type="text" class="form-control border-secondary mb-3 py-2" placeholder="Gamertag" required>
+                                <input type="email" class="form-control border-secondary mb-3 py-2" placeholder="E-mail" required>
+                                <input type="password" class="form-control border-secondary mb-4 py-2" placeholder="Senha" required>
+                                <button type="submit" class="btn btn-outline-danger w-100 py-2 fw-bold fs-5">CRIAR CONTA</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

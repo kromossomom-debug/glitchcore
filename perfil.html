@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quartel General | GLITCHcore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* CSS Específico do Perfil adaptado ao sistema de temas */
+        body { background-color: var(--bg-principal); color: var(--texto-principal); transition: 0.3s; }
+        .profile-cover { 
+            height: 300px; 
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), var(--bg-principal)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070') center/cover; 
+            position: relative; 
+            border-bottom: 2px solid var(--neon-blue); 
+        }
+        .avatar-container { margin-top: -80px; position: relative; z-index: 10; }
+        .avatar-lg { width: 160px; height: 160px; object-fit: cover; border: 6px solid var(--bg-principal); box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); background-color: var(--bg-cards); }
+        .status-dot { width: 20px; height: 20px; background-color: #00ff44; border: 4px solid var(--bg-principal); border-radius: 50%; position: absolute; bottom: 10px; right: 15px; }
+        .stat-card { background: var(--bg-cards); border: 1px solid var(--borda); border-radius: 12px; padding: 20px; transition: 0.3s; backdrop-filter: blur(10px); }
+        .stat-card:hover { border-color: var(--neon-pink); transform: translateY(-5px); }
+        .xp-bar { height: 8px; background-color: var(--borda); border-radius: 4px; overflow: hidden; margin-top: 10px; }
+        .xp-fill { height: 100%; background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue)); transition: width 1s ease-in-out; }
+    </style>
+</head>
+<body>
+
+    <script>
+        (function() {
+            const temaSalvo = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', temaSalvo);
+        })();
+    </script>
+
+    <nav class="navbar position-absolute w-100" style="z-index: 100;">
+        <div class="container mt-3">
+            <a href="index.html" class="btn btn-outline-info fw-bold bg-dark bg-opacity-50">
+                <i class="fa-solid fa-arrow-left me-2"></i> Retornar à Base
+            </a>
+        </div>
+    </nav>
+
+    <div id="loadingProfile" class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+        <div class="spinner-border text-info" style="width: 4rem; height: 4rem;"></div>
+    </div>
+
+    <div id="conteudoProfile" class="d-none pb-5">
+        <div class="profile-cover"></div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 text-center text-lg-start">
+                    <div class="avatar-container d-inline-block">
+                        <img id="userPhoto" src="" alt="Avatar" class="rounded-circle avatar-lg" referrerpolicy="no-referrer">
+                        <div class="status-dot" title="Online"></div>
+                    </div>
+                    
+                    <h2 id="userName" class="fw-bold mt-3 mb-1 font-syncopate letter-spacing-1">Carregando...</h2>
+                    <p id="userEmail" class="text-secondary mb-3"><i class="fa-brands fa-google me-1"></i> aguarde...</p>
+                    
+                    <div id="userBadge"></div>
+
+                    <div class="card mb-4 mt-2">
+                        <div class="card-body">
+                            <h6 id="nivelTexto" class="text-uppercase text-muted fw-bold mb-3">Progresso - Nível 1</h6>
+                            <div class="d-flex justify-content-between small fw-bold">
+                                <span id="xpAtual" class="text-info">0 XP</span>
+                                <span id="xpTotal">100 XP</span>
+                            </div>
+                            <div class="xp-bar">
+                                <div id="xpBarra" class="xp-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="btnSair" class="btn btn-outline-danger w-100 fw-bold py-2">
+                        <i class="fa-solid fa-power-off me-2"></i> DESCONECTAR
+                    </button>
+                </div>
+
+                <div class="col-lg-8 mt-5 mt-lg-0 pt-lg-4">
+                    <h4 class="fw-bold border-bottom border-secondary pb-3 mb-4"><i class="fa-solid fa-chart-simple text-info me-2"></i> Ficha de Serviço</h4>
+                    
+                    <div class="row g-3 mb-5">
+                        <div class="col-md-4 col-6">
+                            <div class="stat-card text-center">
+                                <i class="fa-solid fa-book-open text-danger fs-2 mb-2"></i>
+                                <h3 id="statLeituras" class="fw-bold mb-0">0</h3>
+                                <span class="text-muted small text-uppercase">Matérias Lidas</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6">
+                            <div class="stat-card text-center">
+                                <i class="fa-solid fa-comment-dots text-info fs-2 mb-2"></i>
+                                <h3 id="statComentarios" class="fw-bold mb-0">0</h3>
+                                <span class="text-muted small text-uppercase">Comentários</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-12">
+                            <div class="stat-card text-center">
+                                <i class="fa-solid fa-calendar-check text-warning fs-2 mb-2"></i>
+                                <h3 id="statDias" class="fw-bold mb-0">0</h3>
+                                <span class="text-muted small text-uppercase">Dias Logados</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-HlFxDsp4AsbezKd28YpiQZi3UHUipbc",
+            authDomain: "nexus-6d8df.firebaseapp.com",
+            projectId: "nexus-6d8df",
+            storageBucket: "nexus-6d8df.firebasestorage.app",
+            messagingSenderId: "1045779517061",
+            appId: "1:1045779517061:web:f2d6877724cee68374a3ec"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        auth.onAuthStateChanged(usuario => {
+            if (usuario) {
+                const foto = usuario.photoURL || `https://ui-avatars.com/api/?name=${usuario.displayName}&background=ff003c&color=fff`;
+                document.getElementById('userPhoto').src = foto;
+                document.getElementById('userName').innerText = usuario.displayName;
+                document.getElementById('userEmail').innerHTML = `<i class="fa-brands fa-google me-1 text-danger"></i> ${usuario.email}`;
+                
+                const dbKey = 'glitchcore_player_data_' + usuario.uid;
+                let stats = JSON.parse(localStorage.getItem(dbKey));
+                const dataDeHoje = new Date().toLocaleDateString('pt-BR');
+
+                if (!stats) {
+                    stats = { xp: 0, nivel: 1, leituras: 0, comentarios: 0, diasLogados: 1, ultimoLogin: dataDeHoje };
+                } else if (stats.ultimoLogin !== dataDeHoje) {
+                    stats.diasLogados += 1;
+                    stats.xp += 50; 
+                    stats.ultimoLogin = dataDeHoje;
+                }
+
+                stats.nivel = Math.floor(stats.xp / 100) + 1;
+                const xpProximoNivel = stats.nivel * 100;
+                const progressoPorcentagem = ((stats.xp % 100) / 100) * 100;
+
+                localStorage.setItem(dbKey, JSON.stringify(stats));
+
+                let badgesHTML = '<div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-2 mb-4 mt-3">';
+                const isAdmin = (usuario.email === "kromossomo.m@gmail.com");
+
+                badgesHTML += '<span class="badge bg-secondary px-3 py-2 letter-spacing-1 shadow-sm"><i class="fa-solid fa-user-astronaut me-1"></i> RECRUTA</span>';
+
+                if (stats.nivel >= 5 || isAdmin) {
+                    badgesHTML += '<span class="badge bg-info text-dark px-3 py-2 letter-spacing-1 shadow-sm"><i class="fa-solid fa-shield me-1"></i> OPERADOR</span>';
+                }
+
+                if (stats.nivel >= 10 || isAdmin) {
+                    badgesHTML += '<span class="badge bg-warning text-dark px-3 py-2 letter-spacing-1 shadow-sm"><i class="fa-solid fa-star me-1"></i> VETERANO</span>';
+                }
+
+                if (isAdmin) {
+                    badgesHTML += '<span class="badge badge-supremo px-3 py-2 letter-spacing-1 rounded-pill fw-bold"><i class="fa-solid fa-dragon me-2"></i> DIRETOR GLITCHcore</span>';
+                    badgesHTML += '<span class="badge badge-prime px-3 py-2 letter-spacing-1 rounded-pill fw-bold"><i class="fa-solid fa-terminal me-2"></i> ADMIN</span>';
+                }
+
+                badgesHTML += '</div>'; 
+                document.getElementById('userBadge').innerHTML = badgesHTML;
+
+                document.getElementById('nivelTexto').innerText = `Progresso - Nível ${stats.nivel}`;
+                document.getElementById('xpAtual').innerText = `${stats.xp} XP`;
+                document.getElementById('xpTotal').innerText = `${xpProximoNivel} XP`;
+                
+                setTimeout(() => { document.getElementById('xpBarra').style.width = `${progressoPorcentagem}%`; }, 500);
+
+                document.getElementById('statLeituras').innerText = stats.leituras;
+                document.getElementById('statComentarios').innerText = stats.comentarios;
+                document.getElementById('statDias').innerText = stats.diasLogados;
+
+                document.getElementById('loadingProfile').classList.add('d-none');
+                document.getElementById('conteudoProfile').classList.remove('d-none');
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        document.getElementById('btnSair').addEventListener('click', () => {
+            auth.signOut().then(() => window.location.href = 'index.html');
+        });
+    </script>
+</body>
+</html>
